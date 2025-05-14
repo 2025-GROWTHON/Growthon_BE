@@ -1,0 +1,24 @@
+package com.growthon.global.error;
+
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+
+@Getter
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
+public enum ErrorCode {
+
+    // 공통
+    INTERNAL_SERVER_ERROR("서버에 문제가 발생했습니다.", 500),
+    INVALID_INPUT("입력값이 유효하지 않습니다.", 400),
+
+    // 인증 & 권한
+    UNAUTHORIZED("로그인이 필요합니다.", 401),
+    FORBIDDEN("접근 권한이 없습니다.", 403),
+
+    // 비즈니스
+    NOT_FOUND_PRODUCE("해당 농산물을 찾을 수 없습니다.", 404);
+
+    private final String message;
+    private final int status;
+}
