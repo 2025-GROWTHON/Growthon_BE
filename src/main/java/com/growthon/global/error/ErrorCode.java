@@ -17,7 +17,9 @@ public enum ErrorCode {
     FORBIDDEN("접근 권한이 없습니다.", 403),
 
     // 비즈니스
-    NOT_FOUND_PRODUCE("해당 농산물을 찾을 수 없습니다.", 404);
+    NOT_FOUND_PRODUCE("해당 농산물을 찾을 수 없습니다.", 404),
+    NOT_FOUND_USER("존재하지 않는 회원입니다.", 404),
+    DUPLICATE_USER("이미 존재하는 회원입니다.", 409);
 
     private final String message;
     private final int status;
