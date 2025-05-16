@@ -39,7 +39,7 @@ public class Produce extends BaseEntity {
     @Column(columnDefinition = "ENUM('FRUIT', 'VEGETABLE', 'GRAIN', 'NONE')", nullable = false)
     private Category category;
 
-    // price
+    // private int price;
 
     protected Produce() {}
 

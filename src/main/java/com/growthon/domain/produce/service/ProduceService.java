@@ -20,7 +20,7 @@ public class ProduceService {
     private ProduceRepository produceRepository;
 
     // application-local에 path를 설정해야 함
-    // upload.path = C:\Users\경로\Growthon_BE\resources\image\path
+    // e.g. upload.path = C:\Users\경로\Growthon_BE\resources\image\path
     @Value("${upload.path}")
     private String uploadPath;
 
@@ -33,8 +33,7 @@ public class ProduceService {
     public ResponseEntity<ApiResponse<Long>> postProduce(
             PostProduceRequest request,
             MultipartFile images
-    ) throws Exception
-    {
+    ) throws Exception {
         // 이미지 저장, 경로 반환
         String imagePath = saveImage(images);
 

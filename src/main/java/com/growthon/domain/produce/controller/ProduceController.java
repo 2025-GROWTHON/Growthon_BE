@@ -22,7 +22,7 @@ public class ProduceController {
         return ResponseEntity.ok(ApiResponse.of(200, "테스트 성공", "test"));
     }
 
-    //TODO: Exception 구현, price 추가 고려
+    //TODO: Exception 구현, price 추가 고려, userId 연동, 카카오 상담톡 API 추가
     //Produce Post API
     @PostMapping(value = "/api/produce", consumes = {"multipart/form-data"})
     public ResponseEntity<ApiResponse<Long>> postProduce(
