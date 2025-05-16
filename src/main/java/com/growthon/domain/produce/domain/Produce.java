@@ -1,14 +1,17 @@
 package com.growthon.domain.produce.domain;
 
-import com.growthon.domain.produce.dto.PostProduceRequest;
+import com.growthon.domain.produce.dto.request.PostProduceRequest;
+import com.growthon.domain.produce.dto.request.UpdateProduceRequest;
 import com.growthon.domain.produce.model.Category;
 import jakarta.persistence.*;
 import com.growthon.global.domain.BaseEntity;
+import lombok.Getter;
 
 import java.time.LocalDate;
 
 @Entity
 @Table(name = "produce")
+@Getter
 public class Produce extends BaseEntity {
 
     @Id
@@ -54,7 +57,15 @@ public class Produce extends BaseEntity {
         this.category = request.getCategory();
     }
 
-    public long getProduceId() {
-        return produceId;
+    public Produce updateProduce(UpdateProduceRequest request) {
+        this.description = request.getDescription();
+        this.title = request.getTitle();
+        this.harvestDate = request.getHarvestDate();
+        this.origin = request.getOrigin();
+        this.weight = request.getWeight();
+        this.category = request.getCategory();
+        this.images = request.getImages();
+        return this;
     }
+
 }

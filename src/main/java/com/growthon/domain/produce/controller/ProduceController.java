@@ -1,35 +1,61 @@
 package com.growthon.domain.produce.controller;
 
-import com.growthon.domain.produce.dto.PostProduceRequest;
+import com.growthon.domain.produce.dto.request.UpdateProduceRequest;
+import com.growthon.domain.produce.dto.response.GetProduceByIdResponse;
+import com.growthon.domain.produce.dto.request.PostProduceRequest;
+import com.growthon.domain.produce.dto.response.GetProducesResponse;
+import com.growthon.domain.produce.dto.response.UpdateProduceResponse;
 import com.growthon.domain.produce.service.ProduceService;
 import com.growthon.global.response.ApiResponse;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.List;
+
+
 @RestController
 public class ProduceController {
 
-    private ProduceService produceService;
+    private final ProduceService produceService;
 
     public ProduceController(ProduceService produceService) {
         this.produceService = produceService;
     }
 
-    //Test Code
-    @GetMapping("/api/test")
-    public ResponseEntity<ApiResponse<String>> test() {
-        return ResponseEntity.ok(ApiResponse.of(200, "테스트 성공", "test"));
-    }
-
     //TODO: Exception 구현, price 추가 고려, userId 연동, 카카오 상담톡 API 추가
-    //Produce Post API
+
+    // Produce Post API
     @PostMapping(value = "/api/produce", consumes = {"multipart/form-data"})
     public ResponseEntity<ApiResponse<Long>> postProduce(
             @RequestPart("request") PostProduceRequest request,
             @RequestPart("images") MultipartFile images
     ) throws Exception {
         return produceService.postProduce(request, images);
+    }
+
+    // Produce Get API (ALL)
+    @GetMapping("/api/produces")
+    public ResponseEntity<ApiResponse<List<GetProducesResponse>>> getProduces()  {
+        return produceService.getProduces();
+    }
+
+    // Produce Get API (Detail)
+    @GetMapping("/api/produces/{produceId}")
+    public ResponseEntity<ApiResponse<GetProduceByIdResponse>> getProduceById(@PathVariable long produceId)  {
+        return produceService.getProduceById(produceId);
+    }
+
+    // Produce Put API
+    @PutMapping("/api/produce/{produceId}")
+    public ResponseEntity<ApiResponse<UpdateProduceResponse>> putProduce(@PathVariable long produceId, @RequestBody UpdateProduceRequest request)  {
+        return produceService.updateProduce(produceId, request);
+    }
+
+    // Produce Delete API
+    @DeleteMapping("/api/produce/{produceId}")
+    public ResponseEntity<ApiResponse<Void>> deleteProduce(@PathVariable long produceId) {
+        return produceService.deleteProduce(produceId);
     }
 
 }

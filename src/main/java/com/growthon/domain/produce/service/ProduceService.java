@@ -1,7 +1,11 @@
 package com.growthon.domain.produce.service;
 
 import com.growthon.domain.produce.domain.Produce;
-import com.growthon.domain.produce.dto.PostProduceRequest;
+import com.growthon.domain.produce.dto.request.PostProduceRequest;
+import com.growthon.domain.produce.dto.request.UpdateProduceRequest;
+import com.growthon.domain.produce.dto.response.GetProduceByIdResponse;
+import com.growthon.domain.produce.dto.response.GetProducesResponse;
+import com.growthon.domain.produce.dto.response.UpdateProduceResponse;
 import com.growthon.domain.produce.repository.ProduceRepository;
 import com.growthon.global.response.ApiResponse;
 import org.springframework.beans.factory.annotation.Value;
@@ -11,13 +15,14 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
-import java.io.IOException;
+import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 public class ProduceService {
 
-    private ProduceRepository produceRepository;
+    private final ProduceRepository produceRepository;
 
     // application-local에 path를 설정해야 함
     // e.g. upload.path = C:\Users\경로\Growthon_BE\resources\image\path
@@ -67,5 +72,37 @@ public class ProduceService {
 
         // 전체 경로 반환
         return filePath;
+    }
+
+    // Produces Get Service (ALL)
+    @Transactional
+    public ResponseEntity<ApiResponse<List<GetProducesResponse>>> getProduces() {
+        List<GetProducesResponse> produces = produceRepository.findAll()
+                .stream()
+                .map(GetProducesResponse::from)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(ApiResponse.of(200, "상품 목록 조회 성공", produces));
+    }
+
+    // Produce Get Service (Detail)
+    @Transactional
+    public ResponseEntity<ApiResponse<GetProduceByIdResponse>> getProduceById(long produceId) {
+        Produce produce = produceRepository.findByProduceId(produceId);
+        return ResponseEntity.ok(ApiResponse.of(200,"상품 조회 성공", new GetProduceByIdResponse(produce)));
+    }
+
+    // Produce Put Service
+    @Transactional
+    public ResponseEntity<ApiResponse<UpdateProduceResponse>> updateProduce(long produceId, UpdateProduceRequest request) {
+        Produce produce = produceRepository.findByProduceId(produceId);
+
+        return ResponseEntity.ok(ApiResponse.of(200,"상품 정보가 수정되었습니다.", new UpdateProduceResponse(produceId, produce.updateProduce(request).getUpdateAt())));
+    }
+
+    // Produce Delete Service
+    @Transactional
+    public ResponseEntity<ApiResponse<Void>> deleteProduce(long produceId) {
+        produceRepository.delete(produceRepository.findByProduceId(produceId));
+        return ResponseEntity.ok(ApiResponse.of(200, "상품이 삭제되었습니다.", null));
     }
 }

@@ -1,17 +1,13 @@
-package com.growthon.domain.produce.dto;
+package com.growthon.domain.produce.dto.request;
 
 import com.growthon.domain.produce.model.Category;
-import com.growthon.global.domain.BaseEntity;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 
 import java.time.LocalDate;
 
 @Getter
-public class PostProduceRequest extends BaseEntity {
-
-    @NotNull
-    private long userId;
+public class UpdateProduceRequest {
 
     @NotNull
     private String title;
@@ -28,7 +24,9 @@ public class PostProduceRequest extends BaseEntity {
     @NotNull
     private Category category;
 
+    private String images;
+
     private String weight;
 
-//    private int price;
+//  private int price;
 }
