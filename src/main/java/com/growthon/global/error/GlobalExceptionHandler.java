@@ -1,5 +1,6 @@
 package com.growthon.global.error;
 
+import com.growthon.global.jwt.exception.InvalidTokenException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -42,6 +43,14 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(BusinessException.class)
     public ResponseEntity<ErrorResponse> handleBusinessException(BusinessException exception) {
         log.error("handleBusinessException", exception);
+        ErrorResponse errorResponse = ErrorResponse.of(exception.getErrorCode());
+        return new ResponseEntity<>(errorResponse, HttpStatus.valueOf(exception.getErrorCode().getStatus()));
+    }
+
+    // JWT 유효하지 않은 토큰 예외
+    @ExceptionHandler(InvalidTokenException.class)
+    public ResponseEntity<ErrorResponse> handleInvalidTokenException(InvalidTokenException exception) {
+        log.error("handleInvalidTokenException", exception);
         ErrorResponse errorResponse = ErrorResponse.of(exception.getErrorCode());
         return new ResponseEntity<>(errorResponse, HttpStatus.valueOf(exception.getErrorCode().getStatus()));
     }
