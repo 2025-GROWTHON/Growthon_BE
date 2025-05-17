@@ -1,8 +1,7 @@
 package com.growthon.domain.user.controller;
 
 import com.growthon.domain.user.domain.User;
-import com.growthon.domain.user.dto.UserLoginRequest;
-import com.growthon.domain.user.dto.UserLoginResponse;
+
 import com.growthon.domain.user.dto.UserRegisterRequest;
 import com.growthon.domain.user.service.UserService;
 import com.growthon.global.response.ApiResponse;
@@ -34,13 +33,6 @@ public class UserController {
     public ResponseEntity<ApiResponse<Void>> deleteUser(@PathVariable Long id) {
         userService.deleteUser(id);
         return ResponseEntity.ok(ApiResponse.of(200, "회원 탈퇴가 완료되었습니다.", null));
-    }
-
-    // 로그인 (JWT 구현 후 작성)
-    @PostMapping("/login")
-    public ResponseEntity<ApiResponse<UserLoginResponse>> login(@Valid @RequestBody UserLoginRequest request) {
-        // 추후 AuthService로 위임
-        return ResponseEntity.ok().build(); // 임시
     }
 
 }
