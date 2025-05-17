@@ -1,11 +1,15 @@
 package com.growthon.domain.user.domain;
 
+import com.growthon.domain.produce.domain.Produce;
 import com.growthon.domain.user.model.Role;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import lombok.*;
 import org.springframework.security.crypto.password.PasswordEncoder;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "users")
@@ -39,6 +43,9 @@ public class User {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private Role role;
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Produce> produces = new ArrayList<>();
 
     // JPA 엔티티가 DB에 저장되기 직전에 실행되는 메서드 (모든 회원은 기본적으로 USER 권한을 가짐)
     // 관리자 권한은 일반 사용자에게 자동 부여되지 않으며, 검증된 농가에게만 운영자 측에서 직접 관리자 권한을 부여

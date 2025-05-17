@@ -10,13 +10,16 @@ import com.growthon.domain.produce.exception.NotFoundProduceException;
 import com.growthon.domain.produce.repository.ProduceRepository;
 import com.growthon.global.error.ErrorCode;
 import com.growthon.global.response.ApiResponse;
+import com.growthon.global.security.CustomUserDetails;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
+import java.nio.file.AccessDeniedException;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -39,12 +42,13 @@ public class ProduceService {
     @Transactional
     public ResponseEntity<ApiResponse<Long>> postProduce(
             PostProduceRequest request,
-            MultipartFile images
+            MultipartFile images,
+            @AuthenticationPrincipal CustomUserDetails userDetails
     ) throws Exception {
         // 이미지 저장, 경로 반환
         String imagePath = saveImage(images);
 
-        Produce produce = produceRepository.save(new Produce(request, imagePath));
+        Produce produce = produceRepository.save(new Produce(request, imagePath, userDetails.getUser()));
 
         return ResponseEntity.ok(ApiResponse.of(201, "상품이 정상적으로 등록되었습니다.", produce.getProduceId()));
     }
@@ -96,18 +100,41 @@ public class ProduceService {
 
     // Produce Put Service
     @Transactional
-    public ResponseEntity<ApiResponse<UpdateProduceResponse>> updateProduce(long produceId, UpdateProduceRequest request) {
+    public ResponseEntity<ApiResponse<UpdateProduceResponse>> updateProduce (
+            long produceId,
+            UpdateProduceRequest request,
+            @AuthenticationPrincipal CustomUserDetails userDetails
+    ) throws Exception {
+        // 상품 조회
         Produce produce = produceRepository.findByProduceId(produceId)
                 .orElseThrow(() -> new NotFoundProduceException(ErrorCode.NOT_FOUND_PRODUCE));
-
+        // 권한 확인
+        if (produce.getUser().getId() != userDetails.getUser().getId()) {
+            throw new AccessDeniedException("상품을 수정할 권한이 없습니다.");
+        }
+        // 수정 및 반환
         return ResponseEntity.ok(ApiResponse.of(200,"상품 정보가 수정되었습니다.", new UpdateProduceResponse(produceId, produce.updateProduce(request).getUpdateAt())));
     }
 
     // Produce Delete Service
     @Transactional
-    public ResponseEntity<ApiResponse<Void>> deleteProduce(long produceId) {
-        produceRepository.delete(produceRepository.findByProduceId(produceId)
-                .orElseThrow(() -> new NotFoundProduceException(ErrorCode.NOT_FOUND_PRODUCE)));
+    public ResponseEntity<ApiResponse<Void>> deleteProduce(
+            long produceId,
+            @AuthenticationPrincipal CustomUserDetails userDetails
+    ) throws Exception {
+
+        // 상품 조회
+        Produce produce = produceRepository.findByProduceId(produceId)
+                .orElseThrow(() -> new NotFoundProduceException(ErrorCode.NOT_FOUND_PRODUCE));
+
+        // 권한 확인
+        if (produce.getUser().getId() != userDetails.getUser().getId()) {
+            throw new AccessDeniedException("상품을 수정할 권한이 없습니다.");
+        }
+
+        // 삭제
+        produceRepository.delete(produce);
+
         return ResponseEntity.ok(ApiResponse.of(200, "상품이 삭제되었습니다.", null));
     }
 }

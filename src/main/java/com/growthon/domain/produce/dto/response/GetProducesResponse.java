@@ -16,8 +16,9 @@ public class GetProducesResponse {
     private final String weight;
     private final LocalDate harvestDate;
     private final LocalDateTime updateAt;
+    private final int price;
 
-    public GetProducesResponse(long produceId, String title, String origin, Category category, String weight, LocalDate harvestDate, LocalDateTime updateAt) {
+    public GetProducesResponse(long produceId, String title, String origin, Category category, String weight, LocalDate harvestDate, LocalDateTime updateAt, int price) {
         this.produceId = produceId;
         this.title = title;
         this.origin = origin;
@@ -25,6 +26,7 @@ public class GetProducesResponse {
         this.weight = weight;
         this.harvestDate = harvestDate;
         this.updateAt = updateAt;
+        this.price = price;
     }
 
     public static GetProducesResponse from (Produce produce) {
@@ -35,7 +37,8 @@ public class GetProducesResponse {
                 produce.getCategory(),
                 produce.getWeight(),
                 produce.getHarvestDate(),
-                produce.getUpdateAt()
+                produce.getUpdateAt(),
+                produce.getPrice()
         );
     }
 }
