@@ -1,6 +1,8 @@
 package com.growthon.global.jwt;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.growthon.global.error.ErrorCode;
+import com.growthon.global.error.ErrorResponse;
 import com.growthon.global.security.CustomUserDetails;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.http.HttpServletRequest;
@@ -17,6 +19,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 
 import java.io.IOException;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 
 @Slf4j
@@ -53,15 +56,35 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
             HttpServletResponse response,
             FilterChain chain,
             Authentication authentication
-    ) {
+    ) throws IOException {
         CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
         String email = userDetails.getUsername();
 
         Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();
         String role = authorities.iterator().hasNext() ? authorities.iterator().next().getAuthority() : "ROLE_USER";
 
-        String token = jwtUtil.createJwt(email, role, 60 * 60 * 1000L);
-        response.addHeader("Authorization", "Bearer " + token);
+        // JWT 생성
+        String token = jwtUtil.createJwt(email, role, 60 * 1000L); // 1분 유효
+
+        // 응답 데이터 생성
+        Map<String, Object> responseData = Map.of(
+                "status", 200,
+                "message", "로그인에 성공했습니다.",
+                "data", Map.of(
+                        "accessToken", token,
+                        "user", Map.of(
+                                "id", userDetails.getId(),
+                                "name", userDetails.getUsername(),
+                                "email", userDetails.getEmail(),
+                                "role", role
+                        )
+                )
+        );
+
+        // JSON 응답 반환
+        response.setStatus(HttpServletResponse.SC_OK);
+        response.setContentType(MediaType.APPLICATION_JSON_VALUE + ";charset=UTF-8");
+        response.getWriter().write(objectMapper.writeValueAsString(responseData));
     }
 
     @Override
@@ -71,10 +94,24 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
             AuthenticationException failed
     ) {
         response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-        response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+        response.setContentType(MediaType.APPLICATION_JSON_VALUE + ";charset=UTF-8");
 
         try {
-            response.getWriter().write("{\"error\": \"Invalid email or password\"}");
+            // 필드 오류 생성
+            ErrorResponse.FieldError fieldError = new ErrorResponse.FieldError(
+                    "email or password",
+                    "",
+                    "Invalid email or password"
+            );
+
+            // ErrorResponse 생성
+            ErrorResponse errorResponse = new ErrorResponse(
+                    ErrorCode.INVALID_INPUT,
+                    List.of(fieldError)
+            );
+
+            // JSON 응답 반환
+            response.getWriter().write(objectMapper.writeValueAsString(errorResponse));
         } catch (IOException e) {
             log.error("Failed to write authentication error response", e);
         }

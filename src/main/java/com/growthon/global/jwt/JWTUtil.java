@@ -61,8 +61,10 @@ public class JWTUtil {
                     .getPayload()
                     .getExpiration();
             return expiration.before(new Date());
+        } catch (ExpiredJwtException e) {
+            throw new InvalidTokenException(ErrorCode.TOKEN_EXPIRED); // 만료된 토큰
         } catch (JwtException e) {
-            throw new InvalidTokenException(ErrorCode.INVALID_TOKEN);
+            throw new InvalidTokenException(ErrorCode.INVALID_TOKEN); // 기타 유효하지 않은 토큰
         }
     }
 
