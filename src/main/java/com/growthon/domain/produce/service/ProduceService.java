@@ -49,7 +49,7 @@ public class ProduceService {
 
     // 이미지 저장 / 전체 경로 생성 및 반환 함수
     @Transactional
-    protected String saveImage(MultipartFile images) throws Exception
+    public String saveImage(MultipartFile images) throws Exception
     {
         // 이미지 없을 시 에러 반환 -> 나중에 에러가 아닌 디폴트 사진으로 변경 (이미지는 필수 X)
         if (images.isEmpty()) {

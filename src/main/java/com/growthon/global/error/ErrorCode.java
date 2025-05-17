@@ -19,7 +19,11 @@ public enum ErrorCode {
     // 비즈니스
     NOT_FOUND_PRODUCE("해당 농산물을 찾을 수 없습니다.", 404),
     NOT_FOUND_USER("존재하지 않는 회원입니다.", 404),
-    DUPLICATE_USER("이미 존재하는 회원입니다.", 409);
+    DUPLICATE_USER("이미 존재하는 회원입니다.", 409),
+
+    // Token
+    INVALID_TOKEN("유효하지 않은 토큰입니다.", 401),
+    TOKEN_EXPIRED("토큰이 만료되었습니다.", 401);
 
     private final String message;
     private final int status;
