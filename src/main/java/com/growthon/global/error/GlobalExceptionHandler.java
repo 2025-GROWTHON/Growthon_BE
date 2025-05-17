@@ -1,5 +1,7 @@
 package com.growthon.global.error;
 
+import com.growthon.domain.produce.exception.NotFoundProduceException;
+import com.growthon.global.error.exception.NotFoundException;
 import com.growthon.global.jwt.exception.InvalidTokenException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -45,6 +47,13 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(InvalidTokenException.class)
     public ResponseEntity<ErrorResponse> handleInvalidTokenException(InvalidTokenException exception) {
         log.error("handleInvalidTokenException", exception);
+        ErrorResponse errorResponse = ErrorResponse.of(exception.getErrorCode());
+        return ResponseEntity.status(HttpStatus.valueOf(exception.getErrorCode().getStatus())).body(errorResponse);
+    }
+
+    @ExceptionHandler(NotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleNotFoundException(NotFoundException exception) {
+        log.error("handleNotFoundException", exception);
         ErrorResponse errorResponse = ErrorResponse.of(exception.getErrorCode());
         return ResponseEntity.status(HttpStatus.valueOf(exception.getErrorCode().getStatus())).body(errorResponse);
     }

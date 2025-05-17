@@ -6,7 +6,9 @@ import com.growthon.domain.produce.dto.request.UpdateProduceRequest;
 import com.growthon.domain.produce.dto.response.GetProduceByIdResponse;
 import com.growthon.domain.produce.dto.response.GetProducesResponse;
 import com.growthon.domain.produce.dto.response.UpdateProduceResponse;
+import com.growthon.domain.produce.exception.NotFoundProduceException;
 import com.growthon.domain.produce.repository.ProduceRepository;
+import com.growthon.global.error.ErrorCode;
 import com.growthon.global.response.ApiResponse;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
@@ -25,7 +27,7 @@ public class ProduceService {
     private final ProduceRepository produceRepository;
 
     // application-local에 path를 설정해야 함
-    // e.g. upload.path = C:\Users\경로\Growthon_BE\resources\image\path
+    // e.g. upload.path = C:\Users\경로...
     @Value("${upload.path}")
     private String uploadPath;
 
@@ -87,14 +89,16 @@ public class ProduceService {
     // Produce Get Service (Detail)
     @Transactional
     public ResponseEntity<ApiResponse<GetProduceByIdResponse>> getProduceById(long produceId) {
-        Produce produce = produceRepository.findByProduceId(produceId);
+        Produce produce = produceRepository.findByProduceId(produceId)
+                .orElseThrow(() -> new NotFoundProduceException(ErrorCode.NOT_FOUND_PRODUCE));
         return ResponseEntity.ok(ApiResponse.of(200,"상품 조회 성공", new GetProduceByIdResponse(produce)));
     }
 
     // Produce Put Service
     @Transactional
     public ResponseEntity<ApiResponse<UpdateProduceResponse>> updateProduce(long produceId, UpdateProduceRequest request) {
-        Produce produce = produceRepository.findByProduceId(produceId);
+        Produce produce = produceRepository.findByProduceId(produceId)
+                .orElseThrow(() -> new NotFoundProduceException(ErrorCode.NOT_FOUND_PRODUCE));
 
         return ResponseEntity.ok(ApiResponse.of(200,"상품 정보가 수정되었습니다.", new UpdateProduceResponse(produceId, produce.updateProduce(request).getUpdateAt())));
     }
@@ -102,7 +106,8 @@ public class ProduceService {
     // Produce Delete Service
     @Transactional
     public ResponseEntity<ApiResponse<Void>> deleteProduce(long produceId) {
-        produceRepository.delete(produceRepository.findByProduceId(produceId));
+        produceRepository.delete(produceRepository.findByProduceId(produceId)
+                .orElseThrow(() -> new NotFoundProduceException(ErrorCode.NOT_FOUND_PRODUCE)));
         return ResponseEntity.ok(ApiResponse.of(200, "상품이 삭제되었습니다.", null));
     }
 }
