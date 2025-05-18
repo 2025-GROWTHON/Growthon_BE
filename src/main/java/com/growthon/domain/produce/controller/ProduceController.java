@@ -5,6 +5,7 @@ import com.growthon.domain.produce.dto.request.UpdateProduceRequest;
 import com.growthon.domain.produce.dto.response.GetProduceByIdResponse;
 import com.growthon.domain.produce.dto.response.GetProducesResponse;
 import com.growthon.domain.produce.dto.response.UpdateProduceResponse;
+import com.growthon.domain.produce.exception.NotFoundProduceException;
 import com.growthon.domain.produce.service.ProduceService;
 import com.growthon.global.response.ApiResponse;
 import com.growthon.global.security.CustomUserDetails;
@@ -43,7 +44,8 @@ public class ProduceController {
 
     // Produce Get API (Detail)
     @GetMapping("/api/produces/{produceId}")
-    public ResponseEntity<ApiResponse<GetProduceByIdResponse>> getProduceById(@PathVariable long produceId)  {
+    public ResponseEntity<ApiResponse<GetProduceByIdResponse>> getProduceById(@PathVariable long produceId
+    ) throws NotFoundProduceException {
         return produceService.getProduceById(produceId);
     }
 
@@ -53,7 +55,7 @@ public class ProduceController {
             @PathVariable long produceId,
             @RequestBody UpdateProduceRequest request,
             @AuthenticationPrincipal CustomUserDetails userDetails
-    ) throws Exception {
+    ) throws RuntimeException {
         return produceService.updateProduce(produceId, request, userDetails);
     }
 
@@ -62,7 +64,7 @@ public class ProduceController {
     public ResponseEntity<ApiResponse<Void>> deleteProduce(
             @PathVariable long produceId,
             @AuthenticationPrincipal CustomUserDetails userDetails
-    ) throws Exception {
+    ) throws RuntimeException {
         return produceService.deleteProduce(produceId, userDetails);
     }
 

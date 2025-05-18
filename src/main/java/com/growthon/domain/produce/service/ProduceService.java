@@ -8,6 +8,9 @@ import com.growthon.domain.produce.dto.response.GetProducesResponse;
 import com.growthon.domain.produce.dto.response.UpdateProduceResponse;
 import com.growthon.domain.produce.exception.NotFoundProduceException;
 import com.growthon.domain.produce.repository.ProduceRepository;
+import com.growthon.domain.user.domain.User;
+import com.growthon.domain.user.repository.UserRepository;
+import com.growthon.domain.user.service.UserService;
 import com.growthon.global.error.ErrorCode;
 import com.growthon.global.response.ApiResponse;
 import com.growthon.global.security.CustomUserDetails;
@@ -17,10 +20,11 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
+import com.growthon.domain.produce.exception.AccessDeniedException;
 
 import java.io.File;
-import java.nio.file.AccessDeniedException;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -28,14 +32,16 @@ import java.util.stream.Collectors;
 public class ProduceService {
 
     private final ProduceRepository produceRepository;
+    private final UserRepository userRepository;
 
     // application-local에 path를 설정해야 함
     // e.g. upload.path = C:\Users\경로...
     @Value("${upload.path}")
     private String uploadPath;
 
-    public ProduceService(ProduceRepository produceRepository) {
+    public ProduceService(ProduceRepository produceRepository, UserRepository userRepository) {
         this.produceRepository = produceRepository;
+        this.userRepository = userRepository;
     }
 
     // Produce Post Service
@@ -48,7 +54,14 @@ public class ProduceService {
         // 이미지 저장, 경로 반환
         String imagePath = saveImage(images);
 
-        Produce produce = produceRepository.save(new Produce(request, imagePath, userDetails.getUser()));
+        Long userId = userDetails.getUser() != null ? userDetails.getId() : null;
+        if (userId == null) {
+            throw new IllegalArgumentException("인증 정보에 userId가 없습니다.");
+        }
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("No Such User Found"));
+
+        Produce produce = produceRepository.save(new Produce(request, imagePath, user));
 
         return ResponseEntity.ok(ApiResponse.of(201, "상품이 정상적으로 등록되었습니다.", produce.getProduceId()));
     }
@@ -92,7 +105,7 @@ public class ProduceService {
 
     // Produce Get Service (Detail)
     @Transactional
-    public ResponseEntity<ApiResponse<GetProduceByIdResponse>> getProduceById(long produceId) {
+    public ResponseEntity<ApiResponse<GetProduceByIdResponse>> getProduceById(long produceId) throws NotFoundProduceException {
         Produce produce = produceRepository.findByProduceId(produceId)
                 .orElseThrow(() -> new NotFoundProduceException(ErrorCode.NOT_FOUND_PRODUCE));
         return ResponseEntity.ok(ApiResponse.of(200,"상품 조회 성공", new GetProduceByIdResponse(produce)));
@@ -104,13 +117,13 @@ public class ProduceService {
             long produceId,
             UpdateProduceRequest request,
             @AuthenticationPrincipal CustomUserDetails userDetails
-    ) throws Exception {
+    ) throws RuntimeException {
         // 상품 조회
         Produce produce = produceRepository.findByProduceId(produceId)
                 .orElseThrow(() -> new NotFoundProduceException(ErrorCode.NOT_FOUND_PRODUCE));
         // 권한 확인
-        if (produce.getUser().getId() != userDetails.getUser().getId()) {
-            throw new AccessDeniedException("상품을 수정할 권한이 없습니다.");
+        if (!Objects.equals(produce.getUser().getId(), userDetails.getUser().getId())) {
+            throw new AccessDeniedException(ErrorCode.ACCESS_DENIED);
         }
         // 수정 및 반환
         return ResponseEntity.ok(ApiResponse.of(200,"상품 정보가 수정되었습니다.", new UpdateProduceResponse(produceId, produce.updateProduce(request).getUpdateAt())));
@@ -121,15 +134,15 @@ public class ProduceService {
     public ResponseEntity<ApiResponse<Void>> deleteProduce(
             long produceId,
             @AuthenticationPrincipal CustomUserDetails userDetails
-    ) throws Exception {
+    ) throws RuntimeException {
 
         // 상품 조회
         Produce produce = produceRepository.findByProduceId(produceId)
                 .orElseThrow(() -> new NotFoundProduceException(ErrorCode.NOT_FOUND_PRODUCE));
 
         // 권한 확인
-        if (produce.getUser().getId() != userDetails.getUser().getId()) {
-            throw new AccessDeniedException("상품을 수정할 권한이 없습니다.");
+        if (!Objects.equals(produce.getUser().getId(), userDetails.getUser().getId())) {
+            throw new AccessDeniedException(ErrorCode.ACCESS_DENIED);
         }
 
         // 삭제
