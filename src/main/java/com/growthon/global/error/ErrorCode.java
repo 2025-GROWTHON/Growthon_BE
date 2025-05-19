@@ -20,6 +20,7 @@ public enum ErrorCode {
     NOT_FOUND_PRODUCE("해당 농산물을 찾을 수 없습니다.", 404),
     NOT_FOUND_USER("존재하지 않는 회원입니다.", 404),
     DUPLICATE_USER("이미 존재하는 회원입니다.", 409),
+    ACCESS_DENIED("상품을 수정할 권한이 없습니다.", 403),
 
     // Token
     INVALID_TOKEN("유효하지 않은 토큰입니다.", 401),

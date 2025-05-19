@@ -1,5 +1,6 @@
 package com.growthon.global.error;
 
+import com.growthon.domain.produce.exception.AccessDeniedException;
 import com.growthon.domain.produce.exception.NotFoundProduceException;
 import com.growthon.global.error.exception.NotFoundException;
 import com.growthon.global.jwt.exception.InvalidTokenException;
