@@ -32,6 +32,5 @@ public class PostProduceRequest extends BaseEntity {
     private int price;
 
     private String weight;
-
-//    private int price;
+  
 }

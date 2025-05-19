@@ -1,8 +1,8 @@
 package com.growthon.domain.produce.controller;
 
+import com.growthon.domain.produce.dto.request.PostProduceRequest;
 import com.growthon.domain.produce.dto.request.UpdateProduceRequest;
 import com.growthon.domain.produce.dto.response.GetProduceByIdResponse;
-import com.growthon.domain.produce.dto.request.PostProduceRequest;
 import com.growthon.domain.produce.dto.response.GetProducesResponse;
 import com.growthon.domain.produce.dto.response.UpdateProduceResponse;
 import com.growthon.domain.produce.exception.NotFoundProduceException;
@@ -25,8 +25,6 @@ public class ProduceController {
     public ProduceController(ProduceService produceService) {
         this.produceService = produceService;
     }
-
-    //TODO: Exception 구현, price 추가 고려, userId 연동, 카카오 상담톡 API 추가
 
     // Produce Post API
     @PostMapping(value = "/api/produce", consumes = {"multipart/form-data"})

@@ -49,7 +49,7 @@ public class ProduceService {
     public ResponseEntity<ApiResponse<Long>> postProduce(
             PostProduceRequest request,
             MultipartFile images,
-            @AuthenticationPrincipal Object userDetails // Object로 주입된 경우
+            @AuthenticationPrincipal CustomUserDetails userDetails
     ) throws Exception {
         // userDetails 타입 확인 및 캐스팅
         if (!(userDetails instanceof CustomUserDetails)) {
@@ -75,6 +75,13 @@ public class ProduceService {
 
         // 이후 로직
         String imagePath = saveImage(images);
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("No Such User Found"));
+
+        Long userId = userDetails.getUser() != null ? userDetails.getId() : null;
+        if (userId == null) {
+            throw new IllegalArgumentException("인증 정보에 userId가 없습니다.");
+        }
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("No Such User Found"));
 

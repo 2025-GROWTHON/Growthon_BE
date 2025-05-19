@@ -18,7 +18,8 @@ public class GetProducesResponse {
     private final LocalDateTime updateAt;
     private final int price;
 
-    public GetProducesResponse(Long produceId, String title, String origin, Category category, String weight, LocalDate harvestDate, LocalDateTime updateAt, int price) {        this.produceId = produceId;
+    public GetProducesResponse(long produceId, String title, String origin, Category category, String weight, LocalDate harvestDate, LocalDateTime updateAt, int price) {
+        this.produceId = produceId;
         this.title = title;
         this.origin = origin;
         this.category = category;
