@@ -6,12 +6,15 @@ import com.growthon.domain.produce.dto.request.UpdateProduceRequest;
 import com.growthon.domain.produce.dto.response.GetProduceByIdResponse;
 import com.growthon.domain.produce.dto.response.GetProducesResponse;
 import com.growthon.domain.produce.dto.response.UpdateProduceResponse;
+import com.growthon.domain.produce.exception.AccessDeniedException;
+import com.growthon.domain.produce.exception.NoImageException;
 import com.growthon.domain.produce.exception.NotFoundProduceException;
 import com.growthon.domain.produce.repository.ProduceRepository;
 import com.growthon.domain.user.domain.User;
+import com.growthon.domain.user.exception.NotFoundUserException;
 import com.growthon.domain.user.repository.UserRepository;
-import com.growthon.domain.user.service.UserService;
 import com.growthon.global.error.ErrorCode;
+import com.growthon.global.error.exception.BusinessException;
 import com.growthon.global.response.ApiResponse;
 import com.growthon.global.security.CustomUserDetails;
 import org.springframework.beans.factory.annotation.Value;
@@ -20,9 +23,9 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
-import com.growthon.domain.produce.exception.AccessDeniedException;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
@@ -44,59 +47,13 @@ public class ProduceService {
         this.userRepository = userRepository;
     }
 
-    // Produce Post Service
-    @Transactional
-    public ResponseEntity<ApiResponse<Long>> postProduce(
-            PostProduceRequest request,
-            MultipartFile images,
-            @AuthenticationPrincipal CustomUserDetails userDetails
-    ) throws Exception {
-        // userDetails 타입 확인 및 캐스팅
-        if (!(userDetails instanceof CustomUserDetails)) {
-            throw new IllegalArgumentException("userDetails가 CustomUserDetails 타입이 아닙니다.");
-        }
-        CustomUserDetails customUserDetails = (CustomUserDetails) userDetails;
-
-        System.out.println("customUserDetails: " + customUserDetails);
-        System.out.println("customUserDetails.getUser(): " + customUserDetails.getUser());
-        System.out.println("customUserDetails.getId(): " + customUserDetails.getId());
-
-        // getUser() null 확인
-        System.out.println("CustomUserDetails.getUser(): " + customUserDetails.getUser());
-        if (customUserDetails.getUser() == null) {
-            throw new IllegalArgumentException("CustomUserDetails.getUser()가 null입니다.");
-        }
-
-        // userId 가져오기
-        Long userId = customUserDetails.getId();
-        if (userId == null) {
-            throw new IllegalArgumentException("인증 정보에 userId가 없습니다.");
-        }
-
-        // 이후 로직
-        String imagePath = saveImage(images);
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("No Such User Found"));
-
-        Long userId = userDetails.getUser() != null ? userDetails.getId() : null;
-        if (userId == null) {
-            throw new IllegalArgumentException("인증 정보에 userId가 없습니다.");
-        }
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("No Such User Found"));
-
-        Produce produce = produceRepository.save(new Produce(request, imagePath, user));
-
-        return ResponseEntity.ok(ApiResponse.of(201, "상품이 정상적으로 등록되었습니다.", produce.getProduceId()));
-    }
-
     // 이미지 저장 / 전체 경로 생성 및 반환 함수
     @Transactional
-    public String saveImage(MultipartFile images) throws Exception
+    public String saveImage(MultipartFile images) throws BusinessException, IOException
     {
         // 이미지 없을 시 에러 반환 -> 나중에 에러가 아닌 디폴트 사진으로 변경 (이미지는 필수 X)
         if (images.isEmpty()) {
-            throw new IllegalArgumentException("이미지 파일이 없습니다.");
+            throw new NoImageException(ErrorCode.NO_IMAGE_FILE);
         }
 
         // 고유 파일명 생성
@@ -117,6 +74,48 @@ public class ProduceService {
         return filePath;
     }
 
+    // 상품 조회 및 권한 확인 함수
+    private Produce getProduce(long produceId, CustomUserDetails userDetails) {
+        // User 불러오기
+        Long userId = userDetails.getUser() != null ? userDetails.getId() : null;
+        if (userId == null) {
+            throw new NotFoundUserException(ErrorCode.NOT_FOUND_USER);
+        }
+
+        // 상품 조회
+        Produce produce = produceRepository.findByProduceId(produceId)
+                .orElseThrow(() -> new NotFoundProduceException(ErrorCode.NOT_FOUND_PRODUCE));
+
+        // 권한 확인
+        if (!Objects.equals(produce.getUser().getId(), userId)) {
+            throw new AccessDeniedException(ErrorCode.ACCESS_DENIED);
+        }
+        return produce;
+    }
+
+    // Produce Post Service
+    @Transactional
+    public ResponseEntity<ApiResponse<Long>> postProduce(
+            PostProduceRequest request,
+            MultipartFile images,
+            @AuthenticationPrincipal CustomUserDetails userDetails
+    ) throws RuntimeException, IOException {
+        // User 불러오기
+        Long userId = userDetails.getUser() != null ? userDetails.getId() : null;
+        if (userId == null) {
+            throw new NotFoundUserException(ErrorCode.NOT_FOUND_USER);
+        }
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new NotFoundUserException(ErrorCode.NOT_FOUND_USER));
+
+        // 이미지 저장, 경로 반환
+        String imagePath = saveImage(images);
+
+        Produce produce = produceRepository.save(new Produce(request, imagePath, user));
+
+        return ResponseEntity.ok(ApiResponse.of(201, "상품이 정상적으로 등록되었습니다.", produce.getProduceId()));
+    }
+
     // Produces Get Service (ALL)
     @Transactional
     public ResponseEntity<ApiResponse<List<GetProducesResponse>>> getProduces() {
@@ -129,7 +128,7 @@ public class ProduceService {
 
     // Produce Get Service (Detail)
     @Transactional
-    public ResponseEntity<ApiResponse<GetProduceByIdResponse>> getProduceById(Long produceId) throws NotFoundProduceException {
+    public ResponseEntity<ApiResponse<GetProduceByIdResponse>> getProduceById(long produceId) throws NotFoundProduceException {
         Produce produce = produceRepository.findByProduceId(produceId)
                 .orElseThrow(() -> new NotFoundProduceException(ErrorCode.NOT_FOUND_PRODUCE));
         return ResponseEntity.ok(ApiResponse.of(200,"상품 조회 성공", new GetProduceByIdResponse(produce)));
@@ -138,17 +137,13 @@ public class ProduceService {
     // Produce Put Service
     @Transactional
     public ResponseEntity<ApiResponse<UpdateProduceResponse>> updateProduce (
-            Long produceId,
+            long produceId,
             UpdateProduceRequest request,
             @AuthenticationPrincipal CustomUserDetails userDetails
     ) throws RuntimeException {
-        // 상품 조회
-        Produce produce = produceRepository.findByProduceId(produceId)
-                .orElseThrow(() -> new NotFoundProduceException(ErrorCode.NOT_FOUND_PRODUCE));
-        // 권한 확인
-        if (!Objects.equals(produce.getUser().getId(), userDetails.getUser().getId())) {
-            throw new AccessDeniedException(ErrorCode.ACCESS_DENIED);
-        }
+        // 상품 조회 및 권한 확인
+        Produce produce = getProduce(produceId, userDetails);
+
         // 수정 및 반환
         return ResponseEntity.ok(ApiResponse.of(200,"상품 정보가 수정되었습니다.", new UpdateProduceResponse(produceId, produce.updateProduce(request).getUpdateAt())));
     }
@@ -156,22 +151,16 @@ public class ProduceService {
     // Produce Delete Service
     @Transactional
     public ResponseEntity<ApiResponse<Void>> deleteProduce(
-            Long produceId,
+            long produceId,
             @AuthenticationPrincipal CustomUserDetails userDetails
     ) throws RuntimeException {
-
-        // 상품 조회
-        Produce produce = produceRepository.findByProduceId(produceId)
-                .orElseThrow(() -> new NotFoundProduceException(ErrorCode.NOT_FOUND_PRODUCE));
-
-        // 권한 확인
-        if (!Objects.equals(produce.getUser().getId(), userDetails.getUser().getId())) {
-            throw new AccessDeniedException(ErrorCode.ACCESS_DENIED);
-        }
+        // 상품 조회 및 권한 확인
+        Produce produce = getProduce(produceId, userDetails);
 
         // 삭제
         produceRepository.delete(produce);
 
         return ResponseEntity.ok(ApiResponse.of(200, "상품이 삭제되었습니다.", null));
     }
+
 }

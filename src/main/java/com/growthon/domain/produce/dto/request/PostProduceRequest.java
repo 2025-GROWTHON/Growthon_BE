@@ -9,10 +9,6 @@ import java.time.LocalDate;
 
 @Getter
 public class PostProduceRequest extends BaseEntity {
-
-    @NotNull
-    private Long userId;
-
     @NotNull
     private String title;
 
