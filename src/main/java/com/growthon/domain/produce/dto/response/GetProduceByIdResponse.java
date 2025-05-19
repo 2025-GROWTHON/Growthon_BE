@@ -9,7 +9,7 @@ import java.time.LocalDate;
 
 @Getter
 public class GetProduceByIdResponse extends BaseEntity {
-    private final long produceId;
+    private final Long produceId;
     private final String title;
     private final String origin;
     private final Category category;
@@ -17,7 +17,8 @@ public class GetProduceByIdResponse extends BaseEntity {
     private final LocalDate harvestDate;
     private final String images;
     private final String description;
-    private final long userId;
+    private final Long userId;
+    private final int price;
 
     public GetProduceByIdResponse(Produce produce) {
         this.produceId = produce.getProduceId();
@@ -30,6 +31,7 @@ public class GetProduceByIdResponse extends BaseEntity {
         this.createdAt = produce.getCreatedAt();
         this.description = produce.getDescription();
         this.images = produce.getImages();
-        this.userId = produce.getUserId();
+        this.userId = produce.getUser().getId();
+        this.price = produce.getPrice();
     }
 }

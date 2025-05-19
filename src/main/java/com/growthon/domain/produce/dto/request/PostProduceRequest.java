@@ -11,7 +11,7 @@ import java.time.LocalDate;
 public class PostProduceRequest extends BaseEntity {
 
     @NotNull
-    private long userId;
+    private Long userId;
 
     @NotNull
     private String title;
@@ -27,6 +27,9 @@ public class PostProduceRequest extends BaseEntity {
 
     @NotNull
     private Category category;
+
+    @NotNull
+    private int price;
 
     private String weight;
 

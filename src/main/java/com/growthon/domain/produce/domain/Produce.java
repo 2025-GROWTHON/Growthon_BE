@@ -3,6 +3,7 @@ package com.growthon.domain.produce.domain;
 import com.growthon.domain.produce.dto.request.PostProduceRequest;
 import com.growthon.domain.produce.dto.request.UpdateProduceRequest;
 import com.growthon.domain.produce.model.Category;
+import com.growthon.domain.user.domain.User;
 import jakarta.persistence.*;
 import com.growthon.global.domain.BaseEntity;
 import lombok.Getter;
@@ -16,15 +17,12 @@ public class Produce extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long produceId;
+    private Long produceId;
 
     private String images;
 
     @Column(length = 10)
     private String weight;
-
-    @Column(nullable = false)
-    private long userId;
 
     @Column(nullable = false)
     private String description;
@@ -38,16 +36,21 @@ public class Produce extends BaseEntity {
     @Column(nullable = false, length = 50)
     private String title;
 
+    @Column(nullable = false)
+    private int price;
+
     @Enumerated(EnumType.STRING)
     @Column(columnDefinition = "ENUM('FRUIT', 'VEGETABLE', 'GRAIN', 'NONE')", nullable = false)
     private Category category;
 
-    // private int price;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
 
     protected Produce() {}
 
-    public Produce(PostProduceRequest request, String imagePath) {
-        this.userId = request.getUserId();
+    public Produce(PostProduceRequest request, String imagePath, User user) {
+        this.user = user;
         this.title = request.getTitle();
         this.description = request.getDescription();
         this.harvestDate = request.getHarvestDate();
@@ -55,6 +58,7 @@ public class Produce extends BaseEntity {
         this.weight = request.getWeight();
         this.images = imagePath;
         this.category = request.getCategory();
+        this.price = request.getPrice();
     }
 
     public Produce updateProduce(UpdateProduceRequest request) {

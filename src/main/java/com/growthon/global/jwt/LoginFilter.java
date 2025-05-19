@@ -64,7 +64,8 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
         String role = authorities.iterator().hasNext() ? authorities.iterator().next().getAuthority() : "ROLE_USER";
 
         // JWT 생성
-        String token = jwtUtil.createJwt(email, role, 60 * 1000L); // 1분 유효
+        // JWT 생성
+        String token = jwtUtil.createJwt(userDetails.getId(), email, role, 60 * 60 * 1000L); // 60분 유효
 
         // 응답 데이터 생성
         Map<String, Object> responseData = Map.of(

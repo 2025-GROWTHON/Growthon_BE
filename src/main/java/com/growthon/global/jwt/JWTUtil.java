@@ -51,6 +51,19 @@ public class JWTUtil {
         }
     }
 
+    public Long getId(String token) {
+        try {
+            return Jwts.parser()
+                    .verifyWith(secretKey)
+                    .build()
+                    .parseSignedClaims(token)
+                    .getPayload()
+                    .get("id", Long.class);
+        } catch (JwtException e) {
+            throw new InvalidTokenException(ErrorCode.INVALID_TOKEN);
+        }
+    }
+
     // 만료 여부 확인
     public boolean isExpired(String token) {
         try {
@@ -68,10 +81,11 @@ public class JWTUtil {
         }
     }
 
-    // JWT 생성
-    public String createJwt(String username, String role, Long expiredMs) {
+    // JWTUtil.java
+    public String createJwt(Long id, String username, String role, Long expiredMs) {
         return Jwts.builder()
                 .subject(username)  // subject 필수 아님, but 권장
+                .claim("id", id)    // id 추가
                 .claim("username", username)
                 .claim("role", role)
                 .issuedAt(new Date())

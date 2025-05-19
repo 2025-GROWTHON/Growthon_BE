@@ -28,5 +28,7 @@ public class UpdateProduceRequest {
 
     private String weight;
 
-//  private int price;
+    @NotNull
+    private int price;
+
 }
