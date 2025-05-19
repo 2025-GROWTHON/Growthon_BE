@@ -6,10 +6,10 @@ import java.time.LocalDateTime;
 
 @Getter
 public class UpdateProduceResponse {
-    private final long produceId;
+    private final Long produceId;
     private final LocalDateTime updateAt;
 
-    public UpdateProduceResponse(long produceId, LocalDateTime updateAt) {
+    public UpdateProduceResponse(Long produceId, LocalDateTime updateAt) {
         this.produceId = produceId;
         this.updateAt = updateAt;
     }

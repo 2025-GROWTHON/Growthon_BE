@@ -1,17 +1,19 @@
 package com.growthon.global.security;
 
 import com.growthon.domain.user.domain.User;
-import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.ArrayList;
 import java.util.Collection;
 
-@RequiredArgsConstructor
 public class CustomUserDetails implements UserDetails {
 
     private final User user;
+
+    public CustomUserDetails(User user) {
+        this.user = user;
+    }
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
@@ -68,4 +70,5 @@ public class CustomUserDetails implements UserDetails {
     public User getUser() {
         return user;
     }
+
 }

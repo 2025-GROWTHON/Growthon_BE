@@ -51,8 +51,32 @@ public class ProduceService {
             MultipartFile images,
             @AuthenticationPrincipal CustomUserDetails userDetails
     ) throws Exception {
-        // 이미지 저장, 경로 반환
+        // userDetails 타입 확인 및 캐스팅
+        if (!(userDetails instanceof CustomUserDetails)) {
+            throw new IllegalArgumentException("userDetails가 CustomUserDetails 타입이 아닙니다.");
+        }
+        CustomUserDetails customUserDetails = (CustomUserDetails) userDetails;
+
+        System.out.println("customUserDetails: " + customUserDetails);
+        System.out.println("customUserDetails.getUser(): " + customUserDetails.getUser());
+        System.out.println("customUserDetails.getId(): " + customUserDetails.getId());
+
+        // getUser() null 확인
+        System.out.println("CustomUserDetails.getUser(): " + customUserDetails.getUser());
+        if (customUserDetails.getUser() == null) {
+            throw new IllegalArgumentException("CustomUserDetails.getUser()가 null입니다.");
+        }
+
+        // userId 가져오기
+        Long userId = customUserDetails.getId();
+        if (userId == null) {
+            throw new IllegalArgumentException("인증 정보에 userId가 없습니다.");
+        }
+
+        // 이후 로직
         String imagePath = saveImage(images);
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("No Such User Found"));
 
         Long userId = userDetails.getUser() != null ? userDetails.getId() : null;
         if (userId == null) {
@@ -105,7 +129,7 @@ public class ProduceService {
 
     // Produce Get Service (Detail)
     @Transactional
-    public ResponseEntity<ApiResponse<GetProduceByIdResponse>> getProduceById(long produceId) throws NotFoundProduceException {
+    public ResponseEntity<ApiResponse<GetProduceByIdResponse>> getProduceById(Long produceId) throws NotFoundProduceException {
         Produce produce = produceRepository.findByProduceId(produceId)
                 .orElseThrow(() -> new NotFoundProduceException(ErrorCode.NOT_FOUND_PRODUCE));
         return ResponseEntity.ok(ApiResponse.of(200,"상품 조회 성공", new GetProduceByIdResponse(produce)));
@@ -114,7 +138,7 @@ public class ProduceService {
     // Produce Put Service
     @Transactional
     public ResponseEntity<ApiResponse<UpdateProduceResponse>> updateProduce (
-            long produceId,
+            Long produceId,
             UpdateProduceRequest request,
             @AuthenticationPrincipal CustomUserDetails userDetails
     ) throws RuntimeException {
@@ -132,7 +156,7 @@ public class ProduceService {
     // Produce Delete Service
     @Transactional
     public ResponseEntity<ApiResponse<Void>> deleteProduce(
-            long produceId,
+            Long produceId,
             @AuthenticationPrincipal CustomUserDetails userDetails
     ) throws RuntimeException {
 

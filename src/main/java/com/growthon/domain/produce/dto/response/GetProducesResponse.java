@@ -9,7 +9,7 @@ import java.time.LocalDateTime;
 
 @Getter
 public class GetProducesResponse {
-    private final long produceId;
+    private final Long produceId;
     private final String title;
     private final String origin;
     private final Category category;
@@ -41,4 +41,5 @@ public class GetProducesResponse {
                 produce.getPrice()
         );
     }
+
 }

@@ -32,19 +32,19 @@ public class ProduceController {
             @RequestPart("request") PostProduceRequest request,
             @RequestPart("images") MultipartFile images,
             @AuthenticationPrincipal CustomUserDetails userDetails
-            ) throws Exception {
+    ) throws Exception {
         return produceService.postProduce(request, images, userDetails);
     }
 
     // Produce Get API (ALL)
     @GetMapping("/api/produces")
-    public ResponseEntity<ApiResponse<List<GetProducesResponse>>> getProduces()  {
+    public ResponseEntity<ApiResponse<List<GetProducesResponse>>> getProduces() {
         return produceService.getProduces();
     }
 
     // Produce Get API (Detail)
     @GetMapping("/api/produces/{produceId}")
-    public ResponseEntity<ApiResponse<GetProduceByIdResponse>> getProduceById(@PathVariable long produceId
+    public ResponseEntity<ApiResponse<GetProduceByIdResponse>> getProduceById(@PathVariable Long produceId
     ) throws NotFoundProduceException {
         return produceService.getProduceById(produceId);
     }
@@ -52,7 +52,7 @@ public class ProduceController {
     // Produce Put API
     @PutMapping("/api/produce/{produceId}")
     public ResponseEntity<ApiResponse<UpdateProduceResponse>> putProduce(
-            @PathVariable long produceId,
+            @PathVariable Long produceId,
             @RequestBody UpdateProduceRequest request,
             @AuthenticationPrincipal CustomUserDetails userDetails
     ) throws RuntimeException {
@@ -62,7 +62,7 @@ public class ProduceController {
     // Produce Delete API
     @DeleteMapping("/api/produce/{produceId}")
     public ResponseEntity<ApiResponse<Void>> deleteProduce(
-            @PathVariable long produceId,
+            @PathVariable Long produceId,
             @AuthenticationPrincipal CustomUserDetails userDetails
     ) throws RuntimeException {
         return produceService.deleteProduce(produceId, userDetails);
