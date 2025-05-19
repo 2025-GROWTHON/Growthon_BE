@@ -21,6 +21,7 @@ public enum ErrorCode {
     NOT_FOUND_USER("존재하지 않는 회원입니다.", 404),
     DUPLICATE_USER("이미 존재하는 회원입니다.", 409),
     ACCESS_DENIED("상품을 수정할 권한이 없습니다.", 403),
+    NO_IMAGE_FILE("업로드된 이미지 파일이 없습니다.", 400),
 
     // Token
     INVALID_TOKEN("유효하지 않은 토큰입니다.", 401),
