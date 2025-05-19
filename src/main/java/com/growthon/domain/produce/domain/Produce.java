@@ -17,7 +17,7 @@ public class Produce extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long produceId;
+    private Long produceId;
 
     private String images;
 

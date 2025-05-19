@@ -30,4 +30,5 @@ public class UpdateProduceRequest {
 
     @NotNull
     private int price;
+
 }

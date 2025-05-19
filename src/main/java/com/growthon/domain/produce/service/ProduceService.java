@@ -15,7 +15,6 @@ import com.growthon.domain.user.exception.NotFoundUserException;
 import com.growthon.domain.user.repository.UserRepository;
 import com.growthon.global.error.ErrorCode;
 import com.growthon.global.error.exception.BusinessException;
-import com.growthon.global.error.exception.NotFoundException;
 import com.growthon.global.response.ApiResponse;
 import com.growthon.global.security.CustomUserDetails;
 import org.springframework.beans.factory.annotation.Value;
