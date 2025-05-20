@@ -2,6 +2,7 @@ package com.growthon.domain.produce.dto.response;
 
 import com.growthon.domain.produce.domain.Produce;
 import com.growthon.domain.produce.model.Category;
+import com.growthon.domain.user.domain.User;
 import lombok.Getter;
 
 import java.time.LocalDate;
@@ -17,8 +18,21 @@ public class GetProducesResponse {
     private final LocalDate harvestDate;
     private final LocalDateTime updateAt;
     private final int price;
+    private final Long userId;
+    private final String images;
 
-    public GetProducesResponse(long produceId, String title, String origin, Category category, String weight, LocalDate harvestDate, LocalDateTime updateAt, int price) {
+    public GetProducesResponse(
+            long produceId,
+            String title,
+            String origin,
+            Category category,
+            String weight,
+            LocalDate harvestDate,
+            LocalDateTime updateAt,
+            int price,
+            Long userId,
+            String images
+            ) {
         this.produceId = produceId;
         this.title = title;
         this.origin = origin;
@@ -27,6 +41,8 @@ public class GetProducesResponse {
         this.harvestDate = harvestDate;
         this.updateAt = updateAt;
         this.price = price;
+        this.images = images;
+        this.userId = userId;
     }
 
     public static GetProducesResponse from (Produce produce) {
@@ -38,7 +54,9 @@ public class GetProducesResponse {
                 produce.getWeight(),
                 produce.getHarvestDate(),
                 produce.getUpdateAt(),
-                produce.getPrice()
+                produce.getPrice(),
+                produce.getUser().getId(),
+                produce.getImages()
         );
     }
 
