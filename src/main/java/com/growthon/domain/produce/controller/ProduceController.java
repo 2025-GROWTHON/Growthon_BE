@@ -53,7 +53,7 @@ public class ProduceController {
     @PutMapping("/api/produce/{produceId}")
     public ResponseEntity<ApiResponse<UpdateProduceResponse>> putProduce(
             @PathVariable Long produceId,
-            @RequestBody UpdateProduceRequest request,
+            @ModelAttribute UpdateProduceRequest request,
             @AuthenticationPrincipal CustomUserDetails userDetails
     ) throws RuntimeException {
         return produceService.updateProduce(produceId, request, userDetails);
