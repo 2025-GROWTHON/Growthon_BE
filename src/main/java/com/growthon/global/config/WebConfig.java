@@ -18,6 +18,6 @@ public class WebConfig implements WebMvcConfigurer {
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
         registry.addResourceHandler("/images/**")
-                .addResourceLocations("C:/Users/jundr/Desktop/Growthon_BE/src/main/resources/images/");
+                .addResourceLocations("file:///C:/Users/jundr/Desktop/Growthon_BE/src/main/resources/images/");
     }
 }

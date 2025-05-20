@@ -7,6 +7,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -42,7 +43,7 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         LoginFilter loginFilter = new LoginFilter(authenticationManager(authenticationConfiguration), jwtUtil);
-        loginFilter.setFilterProcessesUrl("/api/users/login"); // JSON 로그인 URL 설정
+        loginFilter.setFilterProcessesUrl("/api/users/login");
 
         http
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
@@ -50,6 +51,19 @@ public class SecurityConfig {
                 .formLogin(form -> form.disable())
                 .httpBasic(basic -> basic.disable())
                 .authorizeHttpRequests(auth -> auth
+                        // /api/produces/**는 인증도, 권한도 필요 없음
+                        .requestMatchers("/api/produces/**").permitAll()
+
+                        // /api/produce 경로는 인증 + ADMIN 권한 필요
+                        .requestMatchers(HttpMethod.POST, "/api/produce").hasAuthority("ROLE_ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/api/produce/**").hasAuthority("ROLE_ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/api/produce/**").hasAuthority("ROLE_ADMIN")
+
+                        // 나머지 /api/produce/**는 로그인만 하면 접근 가능 (ex. GET)
+                        .requestMatchers("/api/produce/**").authenticated()
+
+                        // 기타 요청은 모두 허용
+                        .anyRequest().permitAll()
                         .requestMatchers("/images/**").permitAll()      // 이미지 경로 허용
                         .requestMatchers("/api/produce/**").authenticated() // 토큰 검사 대상
                         .anyRequest().permitAll()                      // 나머지 모두 허용 (필요에 따라 authenticated로 변경)
@@ -57,12 +71,9 @@ public class SecurityConfig {
                 .addFilterBefore(new JWTFilter(jwtUtil), UsernamePasswordAuthenticationFilter.class)
                 .addFilterAt(loginFilter, UsernamePasswordAuthenticationFilter.class)
                 .logout(logout -> logout
-                        .logoutUrl("/api/users/logout") // 로그아웃 요청 URL
+                        .logoutUrl("/api/users/logout")
                         .logoutSuccessHandler((request, response, authentication) -> {
-                            // SecurityContext 초기화
                             SecurityContextHolder.clearContext();
-
-                            // 성공 응답 반환 및 프론트 측에서 localStorage에 저장된 토큰 삭제
                             response.setStatus(HttpServletResponse.SC_OK);
                             response.setContentType("application/json;charset=UTF-8");
                             response.getWriter().write("{\"message\": \"로그아웃이 성공적으로 처리되었습니다.\"}");
