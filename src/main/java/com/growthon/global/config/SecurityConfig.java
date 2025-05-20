@@ -3,6 +3,7 @@ package com.growthon.global.config;
 import com.growthon.global.jwt.JWTFilter;
 import com.growthon.global.jwt.JWTUtil;
 import com.growthon.global.jwt.LoginFilter;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -11,6 +12,7 @@ import org.springframework.security.config.annotation.authentication.configurati
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
@@ -53,6 +55,18 @@ public class SecurityConfig {
                 )
                 .addFilterBefore(new JWTFilter(jwtUtil), UsernamePasswordAuthenticationFilter.class)
                 .addFilterAt(loginFilter, UsernamePasswordAuthenticationFilter.class)
+                .logout(logout -> logout
+                        .logoutUrl("/api/users/logout") // 로그아웃 요청 URL
+                        .logoutSuccessHandler((request, response, authentication) -> {
+                            // SecurityContext 초기화
+                            SecurityContextHolder.clearContext();
+
+                            // 성공 응답 반환 및 프론트 측에서 localStorage에 저장된 토큰 삭제
+                            response.setStatus(HttpServletResponse.SC_OK);
+                            response.setContentType("application/json;charset=UTF-8");
+                            response.getWriter().write("{\"message\": \"로그아웃이 성공적으로 처리되었습니다.\"}");
+                        })
+                )
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
 
         return http.build();
