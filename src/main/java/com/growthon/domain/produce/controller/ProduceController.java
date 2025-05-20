@@ -9,11 +9,16 @@ import com.growthon.domain.produce.exception.NotFoundProduceException;
 import com.growthon.domain.produce.service.ProduceService;
 import com.growthon.global.response.ApiResponse;
 import com.growthon.global.security.CustomUserDetails;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.UrlResource;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.List;
 
 
@@ -67,5 +72,17 @@ public class ProduceController {
     ) throws RuntimeException {
         return produceService.deleteProduce(produceId, userDetails);
     }
+
+
+    @GetMapping("/images/{filename:.+}")
+    public ResponseEntity<Resource> getImage(@PathVariable String filename) throws IOException {
+        File file = new File("C:/Users/jundr/Desktop/Growthon_BE/src/main/resources/images/" + filename);
+        Resource resource = new UrlResource(file.toURI());
+        return ResponseEntity.ok()
+                .contentType(MediaType.IMAGE_JPEG) // 필요시 동적으로 타입 지정
+                .body(resource);
+    }
+
+
 
 }

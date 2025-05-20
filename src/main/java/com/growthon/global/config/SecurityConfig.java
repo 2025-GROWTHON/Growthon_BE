@@ -48,8 +48,9 @@ public class SecurityConfig {
                 .formLogin(form -> form.disable())
                 .httpBasic(basic -> basic.disable())
                 .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/images/**").permitAll()      // 이미지 경로 허용
                         .requestMatchers("/api/produce/**").authenticated() // 토큰 검사 대상
-                        .anyRequest().permitAll()                           // 나머지 모두 허용
+                        .anyRequest().permitAll()                      // 나머지 모두 허용 (필요에 따라 authenticated로 변경)
                 )
                 .addFilterBefore(new JWTFilter(jwtUtil), UsernamePasswordAuthenticationFilter.class)
                 .addFilterAt(loginFilter, UsernamePasswordAuthenticationFilter.class)
@@ -57,6 +58,7 @@ public class SecurityConfig {
 
         return http.build();
     }
+
 
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
