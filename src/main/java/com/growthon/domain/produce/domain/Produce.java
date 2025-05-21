@@ -61,14 +61,14 @@ public class Produce extends BaseEntity {
         this.price = request.getPrice();
     }
 
-    public Produce updateProduce(UpdateProduceRequest request) {
+    public Produce updateProduce(UpdateProduceRequest request, String images) {
         this.description = request.getDescription();
         this.title = request.getTitle();
         this.harvestDate = request.getHarvestDate();
         this.origin = request.getOrigin();
         this.weight = request.getWeight();
         this.category = request.getCategory();
-        this.images = request.getImages();
+        this.images = images;
         return this;
     }
 
