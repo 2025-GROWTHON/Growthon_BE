@@ -58,7 +58,7 @@ public class ProduceService {
         }
 
         // 고유 파일명 생성
-        String fileName = UUID.randomUUID() + images.getOriginalFilename();
+        String fileName = images.getOriginalFilename();
         String filePath = uploadPath + File.separator + fileName;
 
         // 디렉토리 생성
@@ -72,7 +72,7 @@ public class ProduceService {
         images.transferTo(dest);
 
         // 전체 경로 반환
-        return filePath;
+        return fileName;
     }
 
     // 상품 조회 및 권한 확인 함수
