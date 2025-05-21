@@ -51,30 +51,27 @@ public class SecurityConfig {
                 .formLogin(form -> form.disable())
                 .httpBasic(basic -> basic.disable())
                 .authorizeHttpRequests(auth -> auth
+                        // /api/produces/**는 인증도, 권한도 필요 없음
                         .requestMatchers("/api/produces/**").permitAll()
-                        .requestMatchers("/images/**").permitAll()
+                        .requestMatchers("/images/**").permitAll()      // 이미지 경로 허용
+
+                        // /api/produce 경로는 인증 + ADMIN 권한 필요
                         .requestMatchers(HttpMethod.POST, "/api/produce").hasAuthority("ROLE_ADMIN")
                         .requestMatchers(HttpMethod.PUT, "/api/produce/**").hasAuthority("ROLE_ADMIN")
                         .requestMatchers(HttpMethod.DELETE, "/api/produce/**").hasAuthority("ROLE_ADMIN")
+
+                        // 나머지 /api/produce/**는 로그인만 하면 접근 가능 (ex. GET)
                         .requestMatchers("/api/produce/**").authenticated()
+
+                        // 기타 요청은 모두 허용
                         .anyRequest().permitAll()
                 )
                 .addFilterBefore(new JWTFilter(jwtUtil), UsernamePasswordAuthenticationFilter.class)
                 .addFilterAt(loginFilter, UsernamePasswordAuthenticationFilter.class)
-                .logout(logout -> logout
-                        .logoutUrl("/api/users/logout")
-                        .logoutSuccessHandler((request, response, authentication) -> {
-                            SecurityContextHolder.clearContext();
-                            response.setStatus(HttpServletResponse.SC_OK);
-                            response.setContentType("application/json;charset=UTF-8");
-                            response.getWriter().write("{\"message\": \"로그아웃이 성공적으로 처리되었습니다.\"}");
-                        })
-                )
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
 
         return http.build();
     }
-
 
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
