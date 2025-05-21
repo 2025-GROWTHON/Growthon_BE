@@ -22,6 +22,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
@@ -139,13 +140,17 @@ public class ProduceService {
     public ResponseEntity<ApiResponse<UpdateProduceResponse>> updateProduce (
             long produceId,
             UpdateProduceRequest request,
+            MultipartFile images,
             @AuthenticationPrincipal CustomUserDetails userDetails
-    ) throws RuntimeException {
+    ) throws RuntimeException, IOException {
         // 상품 조회 및 권한 확인
         Produce produce = getProduce(produceId, userDetails);
 
+        // 이미지 저장, 경로 반환
+        String imagePath = saveImage(images);
+
         // 수정 및 반환
-        return ResponseEntity.ok(ApiResponse.of(200,"상품 정보가 수정되었습니다.", new UpdateProduceResponse(produceId, produce.updateProduce(request).getUpdateAt())));
+        return ResponseEntity.ok(ApiResponse.of(200,"상품 정보가 수정되었습니다.", new UpdateProduceResponse(produceId, produce.updateProduce(request, imagePath).getUpdateAt())));
     }
 
     // Produce Delete Service

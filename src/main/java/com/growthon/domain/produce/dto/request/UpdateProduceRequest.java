@@ -24,8 +24,6 @@ public class UpdateProduceRequest {
     @NotNull
     private Category category;
 
-    private String images;
-
     private String weight;
 
     @NotNull

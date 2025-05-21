@@ -9,13 +9,21 @@ import com.growthon.domain.produce.exception.NotFoundProduceException;
 import com.growthon.domain.produce.service.ProduceService;
 import com.growthon.global.response.ApiResponse;
 import com.growthon.global.security.CustomUserDetails;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.UrlResource;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.List;
 
+// TODO: resources/images 배포 전 삭제
+// NOTE: 사용 전 application-local.properites에 upload.path="자신의 경로 C:// 등" + /src/main/resources/images 변경
 
 @RestController
 public class ProduceController {
@@ -25,6 +33,9 @@ public class ProduceController {
     public ProduceController(ProduceService produceService) {
         this.produceService = produceService;
     }
+
+    @Value("${upload.path}")
+    private String uploadPath;
 
     // Produce Post API
     @PostMapping(value = "/api/produce", consumes = {"multipart/form-data"})
@@ -53,10 +64,11 @@ public class ProduceController {
     @PutMapping("/api/produce/{produceId}")
     public ResponseEntity<ApiResponse<UpdateProduceResponse>> putProduce(
             @PathVariable Long produceId,
-            @ModelAttribute UpdateProduceRequest request,
+            @RequestPart("request") UpdateProduceRequest request,
+            @RequestPart("images") MultipartFile images,
             @AuthenticationPrincipal CustomUserDetails userDetails
-    ) throws RuntimeException {
-        return produceService.updateProduce(produceId, request, userDetails);
+    ) throws RuntimeException, IOException {
+        return produceService.updateProduce(produceId, request, images, userDetails);
     }
 
     // Produce Delete API
@@ -66,6 +78,15 @@ public class ProduceController {
             @AuthenticationPrincipal CustomUserDetails userDetails
     ) throws RuntimeException {
         return produceService.deleteProduce(produceId, userDetails);
+    }
+
+    @GetMapping("/images/{filename:.+}")
+    public ResponseEntity<Resource> getImage(@PathVariable String filename) throws IOException {
+        File file = new File(uploadPath + "/"+ filename);
+        Resource resource = new UrlResource(file.toURI());
+        return ResponseEntity.ok()
+                .contentType(MediaType.IMAGE_JPEG) // 필요시 동적으로 타입 지정
+                .body(resource);
     }
 
 }
