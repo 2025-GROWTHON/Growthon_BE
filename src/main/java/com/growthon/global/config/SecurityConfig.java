@@ -51,18 +51,12 @@ public class SecurityConfig {
                 .formLogin(form -> form.disable())
                 .httpBasic(basic -> basic.disable())
                 .authorizeHttpRequests(auth -> auth
-                        // /api/produces/**는 인증도, 권한도 필요 없음
                         .requestMatchers("/api/produces/**").permitAll()
-
-                        // /api/produce 경로는 인증 + ADMIN 권한 필요
+                        .requestMatchers("/images/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/produce").hasAuthority("ROLE_ADMIN")
                         .requestMatchers(HttpMethod.PUT, "/api/produce/**").hasAuthority("ROLE_ADMIN")
                         .requestMatchers(HttpMethod.DELETE, "/api/produce/**").hasAuthority("ROLE_ADMIN")
-
-                        // 나머지 /api/produce/**는 로그인만 하면 접근 가능 (ex. GET)
                         .requestMatchers("/api/produce/**").authenticated()
-
-                        // 기타 요청은 모두 허용
                         .anyRequest().permitAll()
                 )
                 .addFilterBefore(new JWTFilter(jwtUtil), UsernamePasswordAuthenticationFilter.class)
