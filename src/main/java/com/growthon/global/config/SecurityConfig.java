@@ -3,6 +3,7 @@ package com.growthon.global.config;
 import com.growthon.global.jwt.JWTFilter;
 import com.growthon.global.jwt.JWTUtil;
 import com.growthon.global.jwt.LoginFilter;
+import com.growthon.global.security.CustomAccessDeniedHandler;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -58,6 +59,9 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.DELETE, "/api/produce/**").hasAuthority("ROLE_ADMIN")
                         .requestMatchers("/api/produce/**").authenticated()
                         .anyRequest().permitAll()
+                )
+                .exceptionHandling(exception -> exception
+                        .accessDeniedHandler(new CustomAccessDeniedHandler()) // AccessDeniedHandler 설정
                 )
                 .addFilterBefore(new JWTFilter(jwtUtil), UsernamePasswordAuthenticationFilter.class)
                 .addFilterAt(loginFilter, UsernamePasswordAuthenticationFilter.class)
