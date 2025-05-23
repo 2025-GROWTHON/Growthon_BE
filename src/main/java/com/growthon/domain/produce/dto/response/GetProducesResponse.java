@@ -2,7 +2,6 @@ package com.growthon.domain.produce.dto.response;
 
 import com.growthon.domain.produce.domain.Produce;
 import com.growthon.domain.produce.model.Category;
-import com.growthon.domain.user.domain.User;
 import lombok.Getter;
 
 import java.time.LocalDate;

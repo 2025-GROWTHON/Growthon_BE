@@ -23,10 +23,6 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-//    카카오 소셜 로그인 확장 고려
-//    @Column(unique = true)
-//    private String kakaoId;
-
     @NotBlank(message = "이름을 입력해주세요")
     @Column(nullable = false, length = 30)
     private String username;

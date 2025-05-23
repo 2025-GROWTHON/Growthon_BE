@@ -22,7 +22,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
-// TODO: resources/images 배포 전 삭제
 // NOTE: 사용 전 application-local.properites에 upload.path="자신의 경로 C:// 등" + /src/main/resources/images 변경
 
 @RestController

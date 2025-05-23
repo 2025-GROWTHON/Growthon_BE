@@ -1,7 +1,6 @@
 package com.growthon.global.error;
 
-import com.growthon.domain.produce.exception.AccessDeniedException;
-import com.growthon.domain.produce.exception.NotFoundProduceException;
+import com.growthon.global.error.exception.BusinessException;
 import com.growthon.global.error.exception.NotFoundException;
 import com.growthon.global.jwt.exception.InvalidTokenException;
 import lombok.extern.slf4j.Slf4j;
@@ -11,7 +10,6 @@ import org.springframework.validation.BindException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-import com.growthon.global.error.exception.BusinessException;
 
 @Slf4j
 @RestControllerAdvice

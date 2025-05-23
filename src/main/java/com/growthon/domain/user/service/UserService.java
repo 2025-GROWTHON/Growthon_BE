@@ -26,7 +26,7 @@ public class UserService {
 
         // 비밀번호 암호화
         User user = request.toEntity();
-        user.encodePassword(passwordEncoder); // User 엔티티에 메서드를 만들면 더 깔끔
+        user.encodePassword(passwordEncoder);
 
         return userRepository.save(user);
     }

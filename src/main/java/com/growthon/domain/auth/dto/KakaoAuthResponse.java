@@ -6,6 +6,6 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor
 public class KakaoAuthResponse {
-    private Long userId;
+    private Long id;
     private String token;
 }
