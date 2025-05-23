@@ -68,6 +68,7 @@ public class Produce extends BaseEntity {
         this.origin = request.getOrigin();
         this.weight = request.getWeight();
         this.category = request.getCategory();
+        this.price = request.getPrice();
         this.images = images;
         return this;
     }
